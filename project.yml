@@ -1,0 +1,44 @@
+name: CodeBar
+options:
+  bundleIdPrefix: com.jxc
+  deploymentTarget:
+    macOS: "13.0"
+  xcodeVersion: "16.0"
+  minimumXcodeGenVersion: "2.38.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+    PRODUCT_BUNDLE_IDENTIFIER: com.jxc.CodeBar
+
+targets:
+  CodeBar:
+    type: application
+    platform: macOS
+    sources:
+      - CodeBar
+    settings:
+      base:
+        INFOPLIST_FILE: CodeBar/Info.plist
+        CODE_SIGN_ENTITLEMENTS: CodeBar/CodeBar.entitlements
+        PRODUCT_NAME: CodeBar
+        GENERATE_INFOPLIST_FILE: false
+    scheme:
+      testTargets:
+        - CodeBarTests
+
+  CodeBarTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - CodeBarTests
+    dependencies:
+      - target: CodeBar
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/CodeBar.app/Contents/MacOS/CodeBar"

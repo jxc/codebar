@@ -1,0 +1,35 @@
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcshareddata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.moved-aside
+
+# Generated Xcode project (regenerate with `make project`)
+*.xcodeproj
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Build artifacts
+bin/
+*.app
+*.dSYM
+*.dmg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# Environment / secrets
+.env
+.env.*
