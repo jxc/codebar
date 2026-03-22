@@ -19,6 +19,7 @@ DerivedData/
 .LSOverride
 
 # Build artifacts
+.build/
 bin/
 *.app
 *.dSYM
