@@ -20,21 +20,12 @@ struct SessionListView: View {
                 .padding(.vertical, 4)
 
             HStack {
-                if HookInstaller.isInstalled {
-                    Button("Remove Hooks") {
-                        try? HookInstaller.uninstall()
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
-                } else {
-                    Button("Install Hooks") {
-                        try? HookInstaller.install()
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.blue)
-                    .font(.caption)
+                Button("Preferences...") {
+                    PreferencesWindowController.shared.showWindow()
                 }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .font(.caption)
 
                 Spacer()
 

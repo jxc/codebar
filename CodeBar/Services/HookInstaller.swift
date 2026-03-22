@@ -14,20 +14,65 @@ enum HookInstaller {
         "Notification", "SessionStart", "SessionEnd", "Stop"
     ]
 
-    /// Returns true if hooks are already installed.
-    static var isInstalled: Bool {
+    // MARK: - Hook Status
+
+    enum HookStatus {
+        case installed
+        case outdated(reasons: [String])
+        case missing
+
+        var isFullyInstalled: Bool {
+            if case .installed = self { return true }
+            return false
+        }
+
+        var label: String {
+            switch self {
+            case .installed: "Installed"
+            case .outdated: "Needs Update"
+            case .missing: "Not Installed"
+            }
+        }
+    }
+
+    /// Inspect hooks and return detailed status.
+    static func inspect() -> HookStatus {
         guard let settings = readSettings(),
               let hooks = settings["hooks"] as? [String: Any]
-        else { return false }
+        else { return .missing }
 
-        // Check if at least SessionStart is configured with our URL
-        guard let entries = hooks["SessionStart"] as? [[String: Any]],
-              let first = entries.first,
-              let innerHooks = first["hooks"] as? [[String: Any]],
-              let url = innerHooks.first?["url"] as? String
-        else { return false }
+        var reasons: [String] = []
 
-        return url == hookURL
+        for event in hookEvents {
+            guard let entries = hooks[event] as? [[String: Any]],
+                  let entry = entries.first(where: { entry in
+                      guard let innerHooks = entry["hooks"] as? [[String: Any]] else { return false }
+                      return innerHooks.contains { ($0["url"] as? String) == hookURL }
+                  }),
+                  let innerHooks = entry["hooks"] as? [[String: Any]],
+                  let hook = innerHooks.first(where: { ($0["url"] as? String) == hookURL })
+            else {
+                reasons.append("\(event): missing")
+                continue
+            }
+
+            if let timeout = hook["timeout"] as? Int, timeout != 5 {
+                reasons.append("\(event): timeout is \(timeout), expected 5")
+            }
+        }
+
+        if reasons.count == hookEvents.count {
+            return .missing
+        } else if reasons.isEmpty {
+            return .installed
+        } else {
+            return .outdated(reasons: reasons)
+        }
+    }
+
+    /// Returns true if hooks are fully installed.
+    static var isInstalled: Bool {
+        inspect().isFullyInstalled
     }
 
     /// Install CodeBar hooks into ~/.claude/settings.json.
@@ -105,7 +150,6 @@ enum HookInstaller {
             withJSONObject: settings,
             options: [.prettyPrinted, .sortedKeys]
         )
-        // Ensure directory exists
         let dir = settingsURL.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         try data.write(to: settingsURL, options: .atomic)

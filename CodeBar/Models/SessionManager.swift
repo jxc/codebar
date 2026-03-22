@@ -79,14 +79,14 @@ final class SessionManager: ObservableObject {
             if !event.cwd.isEmpty {
                 sessions[idx].cwd = event.cwd
             }
-            // Re-read metadata if we don't have a title yet
-            if sessions[idx].customTitle == nil, let path = event.transcriptPath {
+            // Re-read metadata to catch renames
+            if let path = event.transcriptPath {
                 let meta = TranscriptReader.readMeta(from: path)
-                if let title = meta.customTitle {
+                if let title = meta.customTitle, title != sessions[idx].customTitle {
                     sessions[idx].customTitle = title
                     Log.info("Updated title for \(event.sessionId.prefix(8)): \(title)")
                 }
-                if sessions[idx].slug == nil, let slug = meta.slug {
+                if let slug = meta.slug, sessions[idx].slug == nil {
                     sessions[idx].slug = slug
                 }
             }
