@@ -19,6 +19,8 @@ struct HookEvent: Decodable {
 
     // Context
     let gitBranch: String?
+    let transcriptPath: String?
+    let message: String?  // Notification message (e.g. "Claude needs your permission to use Bash")
 
     var toolDescription: String? {
         toolInput?.description ?? toolInput?.command
@@ -45,5 +47,7 @@ struct HookEvent: Decodable {
         case notificationType = "notification_type"
         case source
         case gitBranch
+        case transcriptPath = "transcript_path"
+        case message
     }
 }

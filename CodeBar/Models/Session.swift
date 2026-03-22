@@ -24,16 +24,22 @@ struct Session: Identifiable {
     let id: String          // sessionId from Claude
     let pid: Int
     var cwd: String
-    var slug: String?       // human-readable name from JSONL
+    var customTitle: String? // user-set name via /rename
+    var slug: String?        // auto-generated slug from JSONL
     var gitBranch: String?
     var status: SessionStatus = .idle
     var lastActivity: String = "Idle"
     var lastUpdated: Date = Date()
-    var tty: String?        // e.g. "ttys002"
+    var tty: String?         // e.g. "ttys002"
 
     var displayName: String {
-        if let slug { return slug }
-        // Fall back to last path component of cwd
-        return (cwd as NSString).lastPathComponent
+        let project = (cwd as NSString).lastPathComponent
+        if let title = customTitle {
+            return "\(title) (\(project))"
+        }
+        if let slug {
+            return "\(slug) (\(project))"
+        }
+        return project
     }
 }

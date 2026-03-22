@@ -81,7 +81,7 @@ final class SessionManager: ObservableObject {
             }
             return sessions[idx]
         }
-        // New session — look up PID and TTY from session files
+        // New session — look up PID, TTY, and metadata
         let pid = Self.findPID(for: event.sessionId)
         var session = Session(
             id: event.sessionId,
@@ -89,8 +89,18 @@ final class SessionManager: ObservableObject {
             cwd: event.cwd
         )
         session.tty = pid > 0 ? ProcessInfo.ttyForPID(pid) : nil
+
+        // Read session name from transcript
+        if let path = event.transcriptPath {
+            let meta = TranscriptReader.readMeta(from: path)
+            session.customTitle = meta.customTitle
+            session.slug = meta.slug
+            Log.info("New session \(event.sessionId.prefix(8)) pid=\(pid) title=\(meta.customTitle ?? "nil") slug=\(meta.slug ?? "nil") cwd=\(event.cwd)")
+        } else {
+            Log.info("New session \(event.sessionId.prefix(8)) pid=\(pid) cwd=\(event.cwd) (no transcript path)")
+        }
+
         sessions.append(session)
-        Log.info("New session \(event.sessionId.prefix(8)) pid=\(pid) cwd=\(event.cwd)")
         return session
     }
 
