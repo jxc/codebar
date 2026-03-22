@@ -2,7 +2,7 @@
 
 A macOS menu bar app that monitors your active [Claude Code](https://claude.ai/code) sessions at a glance.
 
-<!-- TODO: screenshot -->
+![CodeBar menu bar](assets/screenshot.jpg)
 
 ## What It Does
 
