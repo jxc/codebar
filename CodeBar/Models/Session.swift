@@ -23,7 +23,7 @@ enum SessionStatus: Int, Comparable {
 struct Session: Identifiable {
     let id: String          // sessionId from Claude
     let pid: Int
-    let cwd: String
+    var cwd: String
     var slug: String?       // human-readable name from JSONL
     var gitBranch: String?
     var status: SessionStatus = .idle

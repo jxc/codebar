@@ -4,7 +4,8 @@ import Foundation
 enum ProcessInfo {
     /// Check if a process with the given PID is alive.
     static func isProcessAlive(pid: Int) -> Bool {
-        kill(Int32(pid), 0) == 0
+        guard pid > 0 else { return false }
+        return kill(Int32(pid), 0) == 0
     }
 
     /// Get the TTY device name for a PID (e.g. "ttys002").

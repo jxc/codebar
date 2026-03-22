@@ -89,6 +89,17 @@ final class HookServer {
             // We have the full body
             let body = data[bodyStart...]
             if !body.isEmpty {
+                // Log all keys in the raw JSON for discovery
+                if let raw = try? JSONSerialization.jsonObject(with: body) as? [String: Any] {
+                    let keys = raw.keys.sorted().joined(separator: ", ")
+                    Log.info("Raw hook keys: \(keys)")
+                    let known: Set = ["session_id", "cwd", "hook_event_name", "tool_name", "tool_input", "notification_type", "source", "gitBranch"]
+                    let extras = raw.keys.filter { !known.contains($0) }
+                    if !extras.isEmpty {
+                        let desc = extras.map { "\($0)=\(raw[$0] ?? "nil")" }.joined(separator: " | ")
+                        Log.info("EXTRA FIELDS: \(desc)")
+                    }
+                }
                 do {
                     let event = try JSONDecoder().decode(HookEvent.self, from: body)
                     onEvent(event)

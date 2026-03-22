@@ -10,7 +10,7 @@ struct CodeBarApp: App {
             SessionListView(sessionManager: sessionManager)
                 .frame(width: 320)
         } label: {
-            Image(nsImage: MenuBarIcon.image(for: sessionManager.aggregateStatus))
+            Image(nsImage: MenuBarIcon.image(for: sessionManager.aggregateStatus, sessionCount: sessionManager.sessions.count))
         }
         .menuBarExtraStyle(.window)
     }

@@ -24,14 +24,13 @@ enum SessionDiscovery {
                 guard let data = try? Data(contentsOf: url),
                       let session = try? JSONDecoder().decode(SessionFile.self, from: data)
                 else { return nil }
-                // Verify process is actually alive
                 guard ProcessInfo.isProcessAlive(pid: session.pid) else { return nil }
                 return session
             }
     }
 
-    /// Look up PID for a given session ID from session files.
-    static func pidForSession(_ sessionId: String) -> Int? {
-        discoverSessions().first(where: { $0.sessionId == sessionId })?.pid
+    /// Find all active PIDs (for dedup matching).
+    static func allActivePIDs() -> [(pid: Int, cwd: String, fileSessionId: String)] {
+        discoverSessions().map { (pid: $0.pid, cwd: $0.cwd, fileSessionId: $0.sessionId) }
     }
 }
