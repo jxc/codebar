@@ -90,6 +90,13 @@ final class SessionManager: ObservableObject {
                     sessions[idx].slug = slug
                 }
             }
+            // Retry TTY lookup if still nil
+            if sessions[idx].tty == nil, sessions[idx].pid > 0 {
+                sessions[idx].tty = ProcessInfo.ttyForPID(sessions[idx].pid)
+                if sessions[idx].tty != nil {
+                    Log.info("Late TTY resolution for \(event.sessionId.prefix(8)): \(sessions[idx].tty!)")
+                }
+            }
             return sessions[idx]
         }
         // New session — look up PID, TTY, and metadata
@@ -119,32 +126,10 @@ final class SessionManager: ObservableObject {
         sessions.firstIndex(where: { $0.id == sessionId })
     }
 
-    /// Try to find the PID for a hook session by checking which session file
-    /// has a JSONL transcript matching this session ID.
+    /// Find the PID for a hook session by matching against ~/.claude/sessions/*.json.
     private static func findPID(for hookSessionId: String) -> Int {
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        let projectsDir = home.appendingPathComponent(".claude/projects")
-
-        guard let projectDirs = try? FileManager.default.contentsOfDirectory(
-            at: projectsDir, includingPropertiesForKeys: nil
-        ) else { return 0 }
-
-        // Find which project dir contains a JSONL for this session
-        for dir in projectDirs {
-            let jsonl = dir.appendingPathComponent("\(hookSessionId).jsonl")
-            if FileManager.default.fileExists(atPath: jsonl.path) {
-                // Decode directory name back to CWD path
-                let dirName = dir.lastPathComponent
-                let cwd = "/" + dirName.split(separator: "-").joined(separator: "/")
-
-                // Find a session file with matching CWD
-                let allSessions = SessionDiscovery.discoverSessions()
-                if let match = allSessions.first(where: { $0.cwd == cwd }) {
-                    return match.pid
-                }
-            }
-        }
-        return 0
+        let allSessions = SessionDiscovery.discoverSessions()
+        return allSessions.first(where: { $0.sessionId == hookSessionId })?.pid ?? 0
     }
 
     private func recomputeAggregate() {

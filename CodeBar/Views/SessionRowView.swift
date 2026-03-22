@@ -56,7 +56,14 @@ struct SessionRowView: View {
     }
 
     private func handleClick() {
-        guard let tty = session.tty else { return }
+        guard let tty = session.tty else {
+            Log.info("Click ignored: no TTY for session \(session.id.prefix(8)) pid=\(session.pid)")
+            return
+        }
+        guard ITermController.isITermRunning else {
+            Log.info("Click ignored: iTerm2 is not running")
+            return
+        }
         ITermController.switchToTab(tty: tty)
     }
 }
