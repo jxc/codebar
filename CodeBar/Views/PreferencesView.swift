@@ -3,7 +3,7 @@ import SwiftUI
 struct PreferencesView: View {
     var body: some View {
         GeneralTab()
-            .frame(width: 450, height: 300)
+            .frame(width: 450, height: 380)
     }
 }
 
@@ -66,6 +66,21 @@ private struct GeneralTab: View {
                 Text("Hooks")
             } footer: {
                 Text("CodeBar uses Claude Code hooks to receive real-time session updates. Hooks are stored in ~/.claude/settings.json.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Picker("Status display", selection: $preferences.statusDisplayMode) {
+                    ForEach(StatusDisplayMode.allCases, id: \.self) { mode in
+                        Text(mode.label).tag(mode)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+            } header: {
+                Text("Menu Bar")
+            } footer: {
+                Text(preferences.statusDisplayMode.description)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
