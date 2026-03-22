@@ -52,6 +52,12 @@ enum Log {
         write("INFO  \(message)")
     }
 
+    /// Only logs when verbose/debug logging is enabled in Preferences.
+    static func debug(_ message: String) {
+        guard UserDefaults.standard.bool(forKey: "debugLogging") else { return }
+        write("DEBUG \(message)")
+    }
+
     // MARK: - Private
 
     private static func write(_ message: String) {
