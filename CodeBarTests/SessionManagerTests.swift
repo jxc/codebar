@@ -32,6 +32,15 @@ final class SessionManagerTests: XCTestCase {
 
         XCTAssertEqual(manager.sessions.first?.status, .blocked)
         XCTAssertEqual(manager.aggregateStatus, .blocked)
+        XCTAssertEqual(manager.sessions.first?.lastActivity, "Waiting for permission…")
+    }
+
+    func testNotificationUsesMessage() {
+        let manager = makeManager()
+        manager.handleHookEvent(makeEvent(name: "Notification", message: "Claude needs your permission to use Bash"))
+
+        XCTAssertEqual(manager.sessions.first?.status, .blocked)
+        XCTAssertEqual(manager.sessions.first?.lastActivity, "Claude needs your permission to use Bash")
     }
 
     func testAggregateReflectsHighestPriority() {
@@ -69,7 +78,8 @@ final class SessionManagerTests: XCTestCase {
         sessionId: String = "test-session",
         name: String,
         toolName: String? = nil,
-        toolDescription: String? = nil
+        toolDescription: String? = nil,
+        message: String? = nil
     ) -> HookEvent {
         let toolInput: [String: Any]? = toolDescription.map { ["description": $0] }
         var dict: [String: Any] = [
@@ -79,6 +89,7 @@ final class SessionManagerTests: XCTestCase {
         ]
         if let toolName { dict["tool_name"] = toolName }
         if let toolInput { dict["tool_input"] = toolInput }
+        if let message { dict["message"] = message }
 
         let data = try! JSONSerialization.data(withJSONObject: dict)
         return try! JSONDecoder().decode(HookEvent.self, from: data)
