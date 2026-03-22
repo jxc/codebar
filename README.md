@@ -6,10 +6,16 @@ A macOS menu bar app that monitors your active [Claude Code](https://claude.ai/c
 
 ## What It Does
 
-- **Menu bar circle** shows aggregate status across all sessions:
-  - 🔵 **Blue** — at least one session is actively working
-  - 🟠 **Orange** — a session is blocked (waiting for permission)
-  - ⚪ **Gray** — all sessions idle
+- **Menu bar status** — two display modes (configurable in Preferences):
+  - **Single circle** (default) — one circle showing the highest-severity status across all sessions
+  - **All active statuses** — one circle per status that has at least one session, each with a count
+
+  ![All active statuses mode](assets/active-statuses.png)
+
+  Status colors:
+  - 🔵 **Blue** — working (a tool is executing)
+  - 🟠 **Orange** — blocked (waiting for permission)
+  - ⚪ **Gray** — idle
 - **Click to expand** — see each session with its name, current activity, and status
 - **Click a session** — instantly switch to that iTerm2 tab
 
@@ -73,7 +79,7 @@ Add this to your `~/.claude/settings.json`:
 | 🟠 | Blocked | Waiting for user permission or input |
 | ⚪ | Idle | Claude finished responding, waiting for next prompt |
 
-The menu bar icon reflects the **highest severity** across all sessions: blocked > working > idle.
+In **Single circle** mode, the icon reflects the **highest severity** across all sessions: blocked > working > idle. In **All active statuses** mode, each status is shown individually with its session count.
 
 ## Terminal Support
 

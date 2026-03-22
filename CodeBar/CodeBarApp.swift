@@ -4,13 +4,17 @@ import SwiftUI
 struct CodeBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @ObservedObject private var sessionManager = AppState.shared.sessionManager
+    @ObservedObject private var preferences = Preferences.shared
 
     var body: some Scene {
         MenuBarExtra {
             SessionListView(sessionManager: sessionManager)
                 .frame(width: 320)
         } label: {
-            Image(nsImage: MenuBarIcon.image(for: sessionManager.aggregateStatus, sessionCount: sessionManager.sessions.count))
+            Image(nsImage: MenuBarIcon.image(
+                sessions: sessionManager.sessions,
+                displayMode: preferences.statusDisplayMode
+            ))
         }
         .menuBarExtraStyle(.window)
     }
