@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SessionRowView: View {
     let session: Session
+    @State private var isHovered = false
 
     var body: some View {
         Button(action: handleClick) {
@@ -31,9 +32,18 @@ struct SessionRowView: View {
 
                 Spacer()
             }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isHovered ? Color.primary.opacity(0.08) : Color.clear)
+            )
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovered = hovering
+        }
     }
 
     private var statusColor: Color {
