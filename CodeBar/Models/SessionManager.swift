@@ -47,7 +47,7 @@ final class SessionManager: ObservableObject {
             let oldStatus = session.status
             if let idx = index(for: event.sessionId) {
                 sessions[idx].status = .blocked
-                sessions[idx].lastActivity = "Waiting for permission…"
+                sessions[idx].lastActivity = event.message ?? "Waiting for permission…"
                 sessions[idx].lastUpdated = Date()
             }
             Log.statusChange(sessionId: event.sessionId, from: oldStatus, to: .blocked)
