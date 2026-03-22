@@ -5,15 +5,27 @@ enum ITermController {
     /// Switch iTerm2 focus to the tab containing the given TTY device.
     /// - Parameter tty: The TTY name, e.g. "ttys002"
     static func switchToTab(tty: String) {
+        Log.info("Switching to iTerm2 tab for TTY \(tty)")
+        let script = switchScript(for: tty)
+        if !runAppleScript(script) {
+            Log.info("Failed to switch iTerm2 tab for TTY \(tty)")
+        }
+    }
+
+    /// Generate the AppleScript to focus the tab containing the given TTY.
+    /// Extracted for testability.
+    static func switchScript(for tty: String) -> String {
         let devicePath = "/dev/\(tty)"
-        let script = """
+        return """
         tell application "iTerm2"
             repeat with w in windows
                 repeat with t in tabs of w
                     repeat with s in sessions of t
                         if tty of s is "\(devicePath)" then
-                            select t
-                            tell w to select t
+                            tell w
+                                select t
+                                set index to 1
+                            end tell
                             activate
                             return
                         end if
@@ -22,7 +34,6 @@ enum ITermController {
             end repeat
         end tell
         """
-        runAppleScript(script)
     }
 
     /// Check if iTerm2 is running.
