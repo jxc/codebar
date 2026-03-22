@@ -3,22 +3,30 @@ import SwiftUI
 @main
 struct CodeBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @ObservedObject private var sessionManager = AppState.shared.sessionManager
 
     var body: some Scene {
         MenuBarExtra {
-            SessionListView(sessionManager: appDelegate.sessionManager)
+            SessionListView(sessionManager: sessionManager)
         } label: {
-            Image(nsImage: MenuBarIcon.image(for: appDelegate.sessionManager.aggregateStatus))
+            Image(nsImage: MenuBarIcon.image(for: sessionManager.aggregateStatus))
         }
     }
 }
 
+/// Shared state accessible from both the App and AppDelegate.
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
-    let sessionManager = SessionManager()
-    private var hookServer: HookServer?
+enum AppState {
+    static let shared = AppStateContainer()
+}
 
-    func applicationDidFinishLaunching(_ notification: Notification) {
+@MainActor
+final class AppStateContainer {
+    let sessionManager = SessionManager()
+    var hookServer: HookServer?
+
+    func startServer() {
+        guard hookServer == nil else { return }
         let manager = sessionManager
         let server = HookServer { event in
             Task { @MainActor in
@@ -31,5 +39,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } catch {
             print("[CodeBar] Failed to start hook server: \(error)")
         }
+    }
+}
+
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        AppState.shared.startServer()
     }
 }

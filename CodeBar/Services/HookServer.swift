@@ -52,17 +52,59 @@ final class HookServer {
                 data.append(content)
             }
 
+            // Try to process if we have a complete HTTP request
+            if self.tryProcessHTTPRequest(data: data, connection: connection) {
+                return // Successfully processed
+            }
+
             if isComplete || error != nil {
-                self.processHTTPRequest(data: data, connection: connection)
+                // Connection closed — try to process whatever we have
+                self.processBody(from: data, connection: connection)
             } else {
+                // Need more data
                 self.receiveData(on: connection, accumulated: data)
             }
         }
     }
 
-    private func processHTTPRequest(data: Data, connection: NWConnection) {
-        // Find the body after \r\n\r\n
+    /// Attempt to parse a complete HTTP request. Returns true if processed.
+    private func tryProcessHTTPRequest(data: Data, connection: NWConnection) -> Bool {
         let separator = Data([0x0D, 0x0A, 0x0D, 0x0A]) // \r\n\r\n
+        guard let headerEnd = data.range(of: separator) else {
+            return false // Haven't received full headers yet
+        }
+
+        // Parse Content-Length from headers
+        let headerData = data[data.startIndex..<headerEnd.lowerBound]
+        guard let headerString = String(data: headerData, encoding: .utf8) else {
+            sendResponse(connection: connection)
+            return true
+        }
+
+        let contentLength = parseContentLength(from: headerString)
+        let bodyStart = headerEnd.upperBound
+        let receivedBodyLength = data.count - bodyStart.advanced(by: 0)
+
+        if receivedBodyLength >= contentLength {
+            // We have the full body
+            let body = data[bodyStart...]
+            if !body.isEmpty {
+                do {
+                    let event = try JSONDecoder().decode(HookEvent.self, from: body)
+                    onEvent(event)
+                } catch {
+                    print("[CodeBar] Failed to parse hook event: \(error)")
+                }
+            }
+            sendResponse(connection: connection)
+            return true
+        }
+
+        return false // Need more body data
+    }
+
+    private func processBody(from data: Data, connection: NWConnection) {
+        let separator = Data([0x0D, 0x0A, 0x0D, 0x0A])
         if let range = data.range(of: separator) {
             let body = data[range.upperBound...]
             if !body.isEmpty {
@@ -74,8 +116,21 @@ final class HookServer {
                 }
             }
         }
+        sendResponse(connection: connection)
+    }
 
-        // Respond 200 OK with empty JSON body
+    private func parseContentLength(from headers: String) -> Int {
+        for line in headers.components(separatedBy: "\r\n") {
+            let parts = line.split(separator: ":", maxSplits: 1)
+            if parts.count == 2,
+               parts[0].trimmingCharacters(in: .whitespaces).lowercased() == "content-length" {
+                return Int(parts[1].trimmingCharacters(in: .whitespaces)) ?? 0
+            }
+        }
+        return 0
+    }
+
+    private func sendResponse(connection: NWConnection) {
         let response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}"
         connection.send(content: response.data(using: .utf8), completion: .contentProcessed { _ in
             connection.cancel()
