@@ -25,6 +25,17 @@ CodeBar uses [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/
 
 ## Install
 
+### Homebrew
+
+```bash
+brew tap jxc/tap
+brew install --cask codebar
+```
+
+### Download
+
+Grab the latest `.dmg` from [Releases](https://github.com/jxc/codebar/releases). The app is signed and notarized — no Gatekeeper warnings.
+
 ### From Source
 
 ```bash
@@ -89,9 +100,22 @@ make build      # Build
 make test       # Run tests
 make run        # Build and launch
 make clean      # Clean build artifacts
+make dmg        # Create a local (unsigned) .dmg
+make archive    # Release archive
 ```
 
 The `.xcodeproj` is generated from `project.yml` via [XcodeGen](https://github.com/yonaskolb/XcodeGen) and is not committed to the repo.
+
+### Releasing
+
+Push a version tag to trigger the release workflow:
+
+```bash
+git tag v1.0.0
+git push --tags
+```
+
+This builds, signs, notarizes, and publishes a `.dmg` to [GitHub Releases](https://github.com/jxc/codebar/releases) automatically. Requires Apple Developer signing secrets configured as GitHub Actions secrets (see `.env.example`).
 
 ## License
 
