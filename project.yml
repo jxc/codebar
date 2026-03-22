@@ -13,6 +13,9 @@ settings:
     CODE_SIGN_IDENTITY: "-"
     CODE_SIGN_STYLE: Manual
     PRODUCT_BUNDLE_IDENTIFIER: com.jxc.CodeBar
+  configs:
+    Release:
+      ENABLE_HARDENED_RUNTIME: "YES"
 
 targets:
   CodeBar:
