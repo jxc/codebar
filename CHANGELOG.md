@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.1] - 2026-03-22
+
+### Fixed
+- Preferences window too short, requiring scrolling to see all sections
+
 ## [1.2.0] - 2026-03-22
 
 ### Improved
