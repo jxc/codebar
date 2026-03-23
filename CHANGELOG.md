@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.0] - 2026-03-22
+
+### Improved
+- Eliminated "CodeBar wants to control System Events" permission prompt by using NSWorkspace instead of AppleScript for iTerm2 detection
+
 ## [1.1.0] - 2026-03-22
 
 ### Improved
