@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.1] - 2026-03-22
+
+### Fixed
+- App icon not showing in Finder/Spotlight (missing `CFBundleIconName` in Info.plist)
+
 ## [1.0.0] - 2026-03-22
 
 ### Features
