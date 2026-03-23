@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 
 /// Controls iTerm2 via AppleScript for tab switching.
 enum ITermController {
@@ -36,15 +36,11 @@ enum ITermController {
         """
     }
 
-    /// Check if iTerm2 is running.
+    /// Check if iTerm2 is running (uses NSWorkspace — no TCC prompt needed).
     static var isITermRunning: Bool {
-        let script = """
-        tell application "System Events"
-            return (name of processes) contains "iTerm2"
-        end tell
-        """
-        let result = runAppleScriptWithResult(script)
-        return result?.lowercased() == "true"
+        NSWorkspace.shared.runningApplications.contains {
+            $0.bundleIdentifier == "com.googlecode.iterm2"
+        }
     }
 
     // MARK: - Private
@@ -59,13 +55,5 @@ enum ITermController {
             return false
         }
         return true
-    }
-
-    private static func runAppleScriptWithResult(_ source: String) -> String? {
-        guard let script = NSAppleScript(source: source) else { return nil }
-        var error: NSDictionary?
-        let result = script.executeAndReturnError(&error)
-        if error != nil { return nil }
-        return result.stringValue
     }
 }
