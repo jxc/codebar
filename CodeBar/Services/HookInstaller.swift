@@ -7,7 +7,8 @@ enum HookInstaller {
             .appendingPathComponent(".claude/settings.json")
     }
 
-    static let hookURL = "http://localhost:\(Constants.hookPort)/hook"
+    /// Legacy HTTP URL used by older hook configs — kept for migration/cleanup.
+    static let legacyHookURL = "http://localhost:\(Constants.hookPort)/hook"
 
     private static let hookEvents = [
         "PreToolUse", "PostToolUse", "PostToolUseFailure",
@@ -45,19 +46,19 @@ enum HookInstaller {
 
         for event in hookEvents {
             guard let entries = hooks[event] as? [[String: Any]],
-                  let entry = entries.first(where: { entry in
-                      guard let innerHooks = entry["hooks"] as? [[String: Any]] else { return false }
-                      return innerHooks.contains { ($0["url"] as? String) == hookURL }
-                  }),
+                  let entry = entries.first(where: { isCodeBarEntry($0) }),
                   let innerHooks = entry["hooks"] as? [[String: Any]],
-                  let hook = innerHooks.first(where: { ($0["url"] as? String) == hookURL })
+                  let hook = innerHooks.first(where: { isCodeBarHook($0) })
             else {
                 reasons.append("\(event): missing")
                 continue
             }
 
-            if let timeout = hook["timeout"] as? Int, timeout != 5 {
-                reasons.append("\(event): timeout is \(timeout), expected 5")
+            // Check it's the new command+async format
+            if hook["type"] as? String == "http" {
+                reasons.append("\(event): using legacy http type, needs upgrade to command+async")
+            } else if hook["async"] as? Bool != true {
+                reasons.append("\(event): missing async flag")
             }
         }
 
@@ -82,9 +83,9 @@ enum HookInstaller {
         var hooks = settings["hooks"] as? [String: Any] ?? [:]
 
         let hookConfig: [String: Any] = [
-            "type": "http",
-            "url": hookURL,
-            "timeout": 5
+            "type": "command",
+            "command": Constants.hookCommand,
+            "async": true
         ]
 
         let hookEntry: [String: Any] = [
@@ -94,11 +95,8 @@ enum HookInstaller {
 
         for event in hookEvents {
             var existing = hooks[event] as? [[String: Any]] ?? []
-            // Remove any existing CodeBar hook entries
-            existing.removeAll { entry in
-                guard let innerHooks = entry["hooks"] as? [[String: Any]] else { return false }
-                return innerHooks.contains { ($0["url"] as? String) == hookURL }
-            }
+            // Remove any existing CodeBar hook entries (both legacy HTTP and current command)
+            existing.removeAll { isCodeBarEntry($0) }
             // Add our hook
             existing.append(hookEntry)
             hooks[event] = existing
@@ -116,10 +114,7 @@ enum HookInstaller {
 
         for event in hookEvents {
             guard var existing = hooks[event] as? [[String: Any]] else { continue }
-            existing.removeAll { entry in
-                guard let innerHooks = entry["hooks"] as? [[String: Any]] else { return false }
-                return innerHooks.contains { ($0["url"] as? String) == hookURL }
-            }
+            existing.removeAll { isCodeBarEntry($0) }
             if existing.isEmpty {
                 hooks.removeValue(forKey: event)
             } else {
@@ -137,6 +132,22 @@ enum HookInstaller {
     }
 
     // MARK: - Private
+
+    /// Check if a hook entry belongs to CodeBar (matches either legacy HTTP or current command format).
+    private static func isCodeBarEntry(_ entry: [String: Any]) -> Bool {
+        guard let innerHooks = entry["hooks"] as? [[String: Any]] else { return false }
+        return innerHooks.contains { isCodeBarHook($0) }
+    }
+
+    /// Check if an individual hook config belongs to CodeBar.
+    private static func isCodeBarHook(_ hook: [String: Any]) -> Bool {
+        // Legacy HTTP format
+        if (hook["url"] as? String) == legacyHookURL { return true }
+        // Current command format
+        if let command = hook["command"] as? String,
+           command.contains("localhost:\(Constants.hookPort)/hook") { return true }
+        return false
+    }
 
     private static func readSettings() -> [String: Any]? {
         guard let data = try? Data(contentsOf: settingsURL),
