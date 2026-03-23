@@ -7,9 +7,17 @@ struct SessionRowView: View {
     var body: some View {
         Button(action: handleClick) {
             HStack(spacing: 8) {
-                Circle()
-                    .fill(statusColor)
-                    .frame(width: 8, height: 8)
+                Group {
+                    if session.status == .none {
+                        Circle()
+                            .strokeBorder(Color.gray.opacity(0.5), lineWidth: 1.5)
+                            .frame(width: 16, height: 16)
+                    } else {
+                        Circle()
+                            .fill(statusColor)
+                            .frame(width: 16, height: 16)
+                    }
+                }
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
@@ -50,7 +58,7 @@ struct SessionRowView: View {
         switch session.status {
         case .none: .gray.opacity(0.5)
         case .idle: .gray
-        case .working: .blue
+        case .working: Color(red: 0.0, green: 0.75, blue: 1.0)
         case .blocked: .orange
         }
     }
