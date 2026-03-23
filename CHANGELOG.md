@@ -1,9 +1,13 @@
 # Changelog
 
-## [1.0.1] - 2026-03-22
+## [1.1.0] - 2026-03-22
+
+### Improved
+- Switched hooks from HTTP to command+async for graceful failure handling
+- Polished preferences window UI with verbose log path info
 
 ### Fixed
-- App icon not showing in Finder/Spotlight (missing `CFBundleIconName` in Info.plist)
+- App icon not showing in Finder/Spotlight (added `CFBundleIconName` to Info.plist and complete macOS icon size set)
 
 ## [1.0.0] - 2026-03-22
 
