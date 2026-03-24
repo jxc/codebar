@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0] - 2026-03-23
+
+### Added
+- Color-blind accessibility: distinct shapes (circle, diamond, triangle) per status so states are distinguishable without color
+- Three color theme presets: Standard, Color-blind safe, and High contrast
+- New Appearance section in Preferences with live preview of current settings
+- Automatic integration with macOS accessibility settings (Differentiate without color, Increase contrast)
+
 ## [1.2.1] - 2026-03-22
 
 ### Fixed
