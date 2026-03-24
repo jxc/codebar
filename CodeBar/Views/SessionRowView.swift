@@ -2,22 +2,22 @@ import SwiftUI
 
 struct SessionRowView: View {
     let session: Session
+    @ObservedObject private var preferences = Preferences.shared
     @State private var isHovered = false
 
     var body: some View {
         Button(action: handleClick) {
             HStack(spacing: 8) {
-                Group {
-                    if session.status == .none {
-                        Circle()
-                            .strokeBorder(Color.gray.opacity(0.5), lineWidth: 1.5)
-                            .frame(width: 16, height: 16)
-                    } else {
-                        Circle()
-                            .fill(statusColor)
-                            .frame(width: 16, height: 16)
-                    }
-                }
+                Image(systemName: StatusAppearance.sfSymbolName(
+                    for: session.status,
+                    shapeMode: preferences.effectiveShapeMode
+                ))
+                .foregroundStyle(StatusAppearance.color(
+                    for: session.status,
+                    theme: preferences.effectiveColorTheme
+                ))
+                .font(.system(size: 10))
+                .frame(width: 16, height: 16)
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
@@ -51,15 +51,6 @@ struct SessionRowView: View {
         .buttonStyle(.plain)
         .onHover { hovering in
             isHovered = hovering
-        }
-    }
-
-    private var statusColor: Color {
-        switch session.status {
-        case .none: .gray.opacity(0.5)
-        case .idle: .gray
-        case .working: Color(red: 0.0, green: 0.75, blue: 1.0)
-        case .blocked: .orange
         }
     }
 
