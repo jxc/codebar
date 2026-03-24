@@ -142,6 +142,25 @@ jobs:
             --title "CodeBar ${{ steps.version.outputs.tag }}" \
             --generate-notes
 
+      - name: Update Homebrew cask
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SHA256=$(shasum -a 256 ".build/CodeBar-${{ steps.version.outputs.tag }}.dmg" | awk '{print $1}')
+
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/jxc/homebrew-tap.git" /tmp/homebrew-tap
+          cd /tmp/homebrew-tap
+
+          sed -i '' "s/version \".*\"/version \"${VERSION}\"/" Casks/codebar.rb
+          sed -i '' "s/sha256 \".*\"/sha256 \"${SHA256}\"/" Casks/codebar.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/codebar.rb
+          git commit -m "codebar ${VERSION}"
+          git push
+
       - name: Cleanup keychain
         if: always()
         run: |
