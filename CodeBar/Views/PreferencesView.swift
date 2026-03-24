@@ -83,6 +83,58 @@ private struct GeneralTab: View {
                 Text(preferences.statusDisplayMode.description)
             }
 
+            // MARK: Appearance
+            Section {
+                Picker("Status shapes", selection: $preferences.statusShapeMode) {
+                    ForEach(StatusShapeMode.allCases, id: \.self) { mode in
+                        Text(mode.label).tag(mode)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+                .disabled(NSWorkspace.shared.accessibilityDisplayShouldDifferentiateWithoutColor)
+
+                Picker("Color theme", selection: $preferences.colorTheme) {
+                    ForEach(ColorTheme.allCases, id: \.self) { theme in
+                        Text(theme.label).tag(theme)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+                .disabled(NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast)
+
+                // Inline preview
+                LabeledContent("Preview") {
+                    HStack(spacing: 12) {
+                        ForEach([SessionStatus.idle, .working, .blocked], id: \.rawValue) { status in
+                            HStack(spacing: 4) {
+                                Image(systemName: StatusAppearance.sfSymbolName(
+                                    for: status,
+                                    shapeMode: preferences.effectiveShapeMode
+                                ))
+                                .foregroundStyle(StatusAppearance.color(
+                                    for: status,
+                                    theme: preferences.effectiveColorTheme
+                                ))
+                                .font(.system(size: 12))
+                                Text(status.label)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+
+                if NSWorkspace.shared.accessibilityDisplayShouldDifferentiateWithoutColor
+                    || NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast {
+                    Text("Some options are overridden by system accessibility settings.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Label("Appearance", systemImage: "eye")
+            } footer: {
+                Text(preferences.effectiveShapeMode.description)
+            }
+
             // MARK: Logging
             Section {
                 Toggle("Verbose hook logging", isOn: $preferences.debugLoggingEnabled)

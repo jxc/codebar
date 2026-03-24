@@ -7,16 +7,18 @@ enum MenuBarIcon {
 
     static func image(
         sessions: [Session],
-        displayMode: StatusDisplayMode
+        displayMode: StatusDisplayMode,
+        shapeMode: StatusShapeMode,
+        colorTheme: ColorTheme
     ) -> NSImage {
         if sessions.isEmpty {
-            return singleCircleImage(status: .none, count: 0)
+            return singleCircleImage(status: .none, count: 0, shapeMode: shapeMode, colorTheme: colorTheme)
         }
 
         switch displayMode {
         case .single:
             let aggregate = sessions.map(\.status).max() ?? .none
-            return singleCircleImage(status: aggregate, count: sessions.count)
+            return singleCircleImage(status: aggregate, count: sessions.count, shapeMode: shapeMode, colorTheme: colorTheme)
 
         case .activeOnly:
             let counts = statusCounts(from: sessions)
@@ -25,15 +27,20 @@ enum MenuBarIcon {
                 return (status, count)
             }
             guard !entries.isEmpty else {
-                return singleCircleImage(status: .none, count: 0)
+                return singleCircleImage(status: .none, count: 0, shapeMode: shapeMode, colorTheme: colorTheme)
             }
-            return multiCircleImage(entries: entries)
+            return multiCircleImage(entries: entries, shapeMode: shapeMode, colorTheme: colorTheme)
         }
     }
 
     /// Legacy convenience — used by tests and anywhere that still passes aggregate status.
-    static func image(for status: SessionStatus, sessionCount: Int = 0) -> NSImage {
-        singleCircleImage(status: status, count: sessionCount)
+    static func image(
+        for status: SessionStatus,
+        sessionCount: Int = 0,
+        shapeMode: StatusShapeMode = .circles,
+        colorTheme: ColorTheme = .standard
+    ) -> NSImage {
+        singleCircleImage(status: status, count: sessionCount, shapeMode: shapeMode, colorTheme: colorTheme)
     }
 
     // MARK: - Statuses (in display order: idle → working → blocked)
@@ -50,7 +57,12 @@ enum MenuBarIcon {
 
     // MARK: - Single Circle (original behavior)
 
-    private static func singleCircleImage(status: SessionStatus, count: Int) -> NSImage {
+    private static func singleCircleImage(
+        status: SessionStatus,
+        count: Int,
+        shapeMode: StatusShapeMode,
+        colorTheme: ColorTheme
+    ) -> NSImage {
         let circleSize: CGFloat = 16
         let font = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .bold)
 
@@ -70,7 +82,7 @@ enum MenuBarIcon {
             let circleY = (rect.height - circleSize) / 2
             let circleRect = NSRect(x: 0, y: circleY, width: circleSize, height: circleSize)
 
-            drawCircle(status: status, in: circleRect)
+            StatusAppearance.drawShape(for: status, shapeMode: shapeMode, theme: colorTheme, in: circleRect)
 
             if let text = countText, status != .none {
                 let textAttrs: [NSAttributedString.Key: Any] = [
@@ -93,7 +105,11 @@ enum MenuBarIcon {
 
     // MARK: - Multi Circle
 
-    private static func multiCircleImage(entries: [(SessionStatus, Int)]) -> NSImage {
+    private static func multiCircleImage(
+        entries: [(SessionStatus, Int)],
+        shapeMode: StatusShapeMode,
+        colorTheme: ColorTheme
+    ) -> NSImage {
         let circleSize: CGFloat = 16
         let font = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .bold)
         let innerSpacing: CGFloat = 3   // circle → count digit
@@ -130,7 +146,7 @@ enum MenuBarIcon {
                 let circleY = (rect.height - circleSize) / 2
                 let circleRect = NSRect(x: x, y: circleY, width: circleSize, height: circleSize)
 
-                drawCircle(status: group.status, in: circleRect)
+                StatusAppearance.drawShape(for: group.status, shapeMode: shapeMode, theme: colorTheme, in: circleRect)
 
                 let textAttrs: [NSAttributedString.Key: Any] = [
                     .font: font,
@@ -151,27 +167,4 @@ enum MenuBarIcon {
         image.isTemplate = false
         return image
     }
-
-    // MARK: - Drawing Primitives
-
-    private static func drawCircle(status: SessionStatus, in rect: NSRect) {
-        switch status {
-        case .none:
-            NSColor.gray.withAlphaComponent(0.5).setStroke()
-            let path = NSBezierPath(ovalIn: rect.insetBy(dx: 1, dy: 1))
-            path.lineWidth = 1.5
-            path.stroke()
-        case .idle:
-            NSColor.gray.setFill()
-            NSBezierPath(ovalIn: rect).fill()
-        case .working:
-            NSColor(red: 0.0, green: 0.75, blue: 1.0, alpha: 1.0).setFill()
-            NSBezierPath(ovalIn: rect).fill()
-        case .blocked:
-            NSColor.systemOrange.setFill()
-            NSBezierPath(ovalIn: rect).fill()
-        }
-    }
-
-
 }

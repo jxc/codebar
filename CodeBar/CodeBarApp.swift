@@ -13,7 +13,9 @@ struct CodeBarApp: App {
         } label: {
             Image(nsImage: MenuBarIcon.image(
                 sessions: sessionManager.sessions,
-                displayMode: preferences.statusDisplayMode
+                displayMode: preferences.statusDisplayMode,
+                shapeMode: preferences.effectiveShapeMode,
+                colorTheme: preferences.effectiveColorTheme
             ))
         }
         .menuBarExtraStyle(.window)
