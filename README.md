@@ -34,18 +34,18 @@ CodeBar uses [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/
 ### Homebrew
 
 ```bash
-brew tap jxc/tap
+brew tap jxc-org/tap
 brew install --cask codebar
 ```
 
 ### Download
 
-Grab the latest `.dmg` from [Releases](https://github.com/jxc/codebar/releases). The app is signed and notarized — no Gatekeeper warnings.
+Grab the latest `.dmg` from [Releases](https://github.com/jxc-org/codebar/releases). The app is signed and notarized — no Gatekeeper warnings.
 
 ### From Source
 
 ```bash
-git clone https://github.com/jxc/codebar.git
+git clone https://github.com/jxc-org/codebar.git
 cd codebar
 make run
 ```
@@ -96,7 +96,7 @@ In **Single circle** mode, the icon reflects the **highest severity** across all
 
 CodeBar currently supports **iTerm2** for click-to-focus tab switching. The status monitor works regardless of terminal.
 
-Want support for your terminal? Check the [open issues](https://github.com/jxc/codebar/issues) or open a PR.
+Want support for your terminal? Check the [open issues](https://github.com/jxc-org/codebar/issues) or open a PR.
 
 ## Development
 
@@ -121,7 +121,7 @@ git tag v1.0.0
 git push --tags
 ```
 
-This builds, signs, notarizes, and publishes a `.dmg` to [GitHub Releases](https://github.com/jxc/codebar/releases) automatically. Requires Apple Developer signing secrets configured as GitHub Actions secrets (see `.env.example`).
+This builds, signs, notarizes, and publishes a `.dmg` to [GitHub Releases](https://github.com/jxc-org/codebar/releases) automatically. Requires Apple Developer signing secrets configured as GitHub Actions secrets (see `.env.example`).
 
 ## License
 
