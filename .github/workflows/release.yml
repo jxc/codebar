@@ -149,7 +149,7 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           SHA256=$(shasum -a 256 ".build/CodeBar-${{ steps.version.outputs.tag }}.dmg" | awk '{print $1}')
 
-          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/jxc/homebrew-tap.git" /tmp/homebrew-tap
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/jxc-org/homebrew-tap.git" /tmp/homebrew-tap
           cd /tmp/homebrew-tap
 
           sed -i '' "s/version \".*\"/version \"${VERSION}\"/" Casks/codebar.rb

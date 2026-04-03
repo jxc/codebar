@@ -48,9 +48,9 @@ dmg: archive
 set-secrets:
 	@test -f .env || (echo "Error: .env not found. Copy .env.example to .env and fill in values." && exit 1)
 	@. ./.env && \
-	base64 -i "$$APPLE_CERTIFICATE_P12_PATH" | gh secret set APPLE_CERTIFICATE_P12 -R jxc/codebar && \
-	echo "$$APPLE_CERTIFICATE_PASSWORD" | gh secret set APPLE_CERTIFICATE_PASSWORD -R jxc/codebar && \
-	echo "$$APPLE_DEVELOPER_ID" | gh secret set APPLE_DEVELOPER_ID -R jxc/codebar && \
-	echo "$$APPLE_APP_SPECIFIC_PASSWORD" | gh secret set APPLE_APP_SPECIFIC_PASSWORD -R jxc/codebar && \
-	echo "$$APPLE_TEAM_ID" | gh secret set APPLE_TEAM_ID -R jxc/codebar && \
-	echo "All 5 secrets set on jxc/codebar"
+	base64 -i "$$APPLE_CERTIFICATE_P12_PATH" | gh secret set APPLE_CERTIFICATE_P12 -R jxc-org/codebar && \
+	echo "$$APPLE_CERTIFICATE_PASSWORD" | gh secret set APPLE_CERTIFICATE_PASSWORD -R jxc-org/codebar && \
+	echo "$$APPLE_DEVELOPER_ID" | gh secret set APPLE_DEVELOPER_ID -R jxc-org/codebar && \
+	echo "$$APPLE_APP_SPECIFIC_PASSWORD" | gh secret set APPLE_APP_SPECIFIC_PASSWORD -R jxc-org/codebar && \
+	echo "$$APPLE_TEAM_ID" | gh secret set APPLE_TEAM_ID -R jxc-org/codebar && \
+	echo "All 5 secrets set on jxc-org/codebar"

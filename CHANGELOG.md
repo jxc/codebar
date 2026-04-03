@@ -42,7 +42,7 @@
 ### Technical
 - HTTP hook server on localhost:8089 (Network.framework, zero dependencies)
 - Signed and notarized DMG distribution
-- Homebrew cask install support (`brew install --cask jxc/tap/codebar`)
+- Homebrew cask install support (`brew install --cask jxc-org/tap/codebar`)
 
 ## [0.1.0] - 2026-03-22
 
